@@ -17,10 +17,11 @@ app.config.from_object('api.config.BaseConfig')
 
 db.init_app(app)
 rest_api.init_app(app)
-cors = CORS(app, resources={r"/api/*": {"origins": "*, "}})
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 # Setup database
-# @app.before_first_request
+@app.before_first_request
 def initialize_database():
     try:
         db.create_all()
@@ -38,25 +39,11 @@ def initialize_database():
 """
    Custom responses
 """
-def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
-
 @app.after_request
-def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
 def after_request(response):
     """
        Sends back a custom error with {"success", "msg"} format
     """
-    add_cors_headers()
 
     if int(response.status_code) >= 400:
         response_data = json.loads(response.get_data())
